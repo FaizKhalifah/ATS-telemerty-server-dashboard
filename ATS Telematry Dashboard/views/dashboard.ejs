@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>ATS Telemetry Dashboard</title>
+
+<style>
+
+body{
+    font-family: Arial;
+    background:#111;
+    color:white;
+    text-align:center;
+}
+
+.container{
+    display:grid;
+    grid-template-columns: repeat(3,1fr);
+    gap:20px;
+    padding:40px;
+}
+
+.card{
+    background:#1f1f1f;
+    padding:20px;
+    border-radius:10px;
+}
+
+.value{
+    font-size:32px;
+    font-weight:bold;
+    margin-top:10px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h1>ATS Telemetry Dashboard</h1>
+
+<div class="container">
+
+<div class="card">
+<h3>Speed</h3>
+<div id="speed" class="value">0</div>
+</div>
+
+<div class="card">
+<h3>RPM</h3>
+<div id="rpm" class="value">0</div>
+</div>
+
+<div class="card">
+<h3>Gear</h3>
+<div id="gear" class="value">0</div>
+</div>
+
+<div class="card">
+<h3>Fuel</h3>
+<div id="fuel" class="value">0</div>
+</div>
+
+<div class="card">
+<h3>Throttle</h3>
+<div id="throttle" class="value">0</div>
+</div>
+
+<div class="card">
+<h3>Brake</h3>
+<div id="brake" class="value">0</div>
+</div>
+
+</div>
+
+<script>
+
+async function updateTelemetry(){
+
+    const res = await fetch("/telemetry");
+    const data = await res.json();
+
+    if(data.status) return;
+
+    document.getElementById("speed").innerText = data.speed.toFixed(2);
+    document.getElementById("rpm").innerText = data.rpm.toFixed(0);
+    document.getElementById("gear").innerText = data.gear;
+    document.getElementById("fuel").innerText = data.fuel.toFixed(1);
+    document.getElementById("throttle").innerText = data.throttle.toFixed(2);
+    document.getElementById("brake").innerText = data.brake.toFixed(2);
+
+}
+
+setInterval(updateTelemetry,2000);
+
+</script>
+
+</body>
+</html>
