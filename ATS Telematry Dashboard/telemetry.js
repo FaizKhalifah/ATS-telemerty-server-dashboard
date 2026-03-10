@@ -1,28 +1,44 @@
 let latestTelemetry = null;
+const fs = require("fs");
+
+const CSV_FILE = "telemetry.csv";
+
+if (!fs.existsSync(CSV_FILE)) {
+
+    const header = "timestamp,speed,rpm,gear,throttle,brake,fuel,x,y,z\n";
+
+    fs.writeFileSync(CSV_FILE, header);
+
+}
 
 async function fetchTelemetry(){
 
     try{
 
-        const res = await fetch("http://localhost:25555/api/ets2/telemetry");
+        const res = await fetch("http://localhost:25555/api/ats/telemetry");
 
         const data = await res.json();
 
-        latestTelemetry = {
-            speed: data.truck.speed,
-            rpm: data.truck.engineRpm,
-            gear: data.truck.gear,
-            throttle: data.truck.gameThrottle,
-            brake: data.truck.gameBrake,
-            fuel: data.truck.fuel
-        };
+        latestTelemetry = data;
 
-        console.log(latestTelemetry);
-        console.log("Telemetry updated");
+        const row = [
+            new Date().toISOString(),
+            data.truck.speed,
+            data.truck.engineRpm,
+            data.truck.gear,
+            data.truck.userThrottle,
+            data.truck.userBrake,
+            data.truck.fuel,
+            data.truck.placement.x,
+            data.truck.placement.y,
+            data.truck.placement.z
+        ].join(",") + "\n";
+
+        fs.appendFileSync(CSV_FILE, row);
 
     }catch(err){
 
-        console.error("Fetch telemetry error:", err.message);
+        console.error("Telemetry error:", err.message);
 
     }
 
