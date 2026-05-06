@@ -14,10 +14,30 @@ if (!fs.existsSync(CSV_FILE)) {
 async function fetchTelemetry(){
 
     try{
+        console.log("Fetching telemetry...");
+        const res = await fetch("http://localhost:25555/api/ets2/telemetry");
 
-        const res = await fetch("http://localhost:25555/api/ats/telemetry");
+        const text = await res.text();
 
-        const data = await res.json();
+        if(!text || text.trim() === ""){
+            console.log("Empty response, skip...");
+            return;
+        }
+
+        const data = JSON.parse(text);
+
+        if(data.game.paused == true){
+            console.log("Game sedang di paused. Skip");
+            return;
+        }
+
+        console.log("data truck saat ini " + JSON.stringify(data.truck));
+
+        // Validasi data
+        if(!data.truck){
+            console.log("Invalid telemetry structure");
+            return;
+        }
 
         latestTelemetry = data;
 
@@ -34,6 +54,7 @@ async function fetchTelemetry(){
             data.truck.placement.z
         ].join(",") + "\n";
 
+        
         fs.appendFileSync(CSV_FILE, row);
 
     }catch(err){
@@ -43,7 +64,6 @@ async function fetchTelemetry(){
     }
 
 }
-
 function startTelemetry(){
 
     console.log("Starting telemetry polling...");
